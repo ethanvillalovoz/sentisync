@@ -5,3 +5,4 @@ matplotlib
 nltk
 scikit-learn
 wordcloud
+mlflow
