@@ -7,10 +7,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const API_KEY = "foobar"; // Replace with your actual API key
 
   // Backend API URL (update for production deployment)
-  // const API_URL = 'http://my-elb-2062136355.us-east-1.elb.amazonaws.com:80';
-  // const API_URL = 'http://localhost:5000/';
   // const API_URL = 'http://127.0.0.1:5050/'; // Local development URL
-  const API_URL = 'https://34.217.70.66:8080/'; // Cloud development URL i.e. use this for Docker container
+  const API_URL = 'http://34.217.70.66:8080/'; // Cloud development URL i.e. use this for Docker container
 
 
   // Get the current tab's URL and check if it's a YouTube video
