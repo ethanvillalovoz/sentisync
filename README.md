@@ -8,6 +8,25 @@ conda activate sentisync
 
 pip install -r requirements.txt
 
+download: https://www.postman.com/downloads/
+
+Json data demo in postman
+http://localhost:5000/predict
+
+{
+    "comments": ["This video is awsome! I loved a lot", "Very bad explanation. poor video"]
+}
+
+download: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+aws configure
+
+# These are the credintials you saved after making an IAM account
+# I.e. `foo_accessKeys.csv`
+# Default Region Name should be whatever region you see you are on for AWS on the top right of the homepage
+# i.e. `us-west-2`
+# You can leave `Default output format [None]:` as blank/empty. Just click enter
+
 DVC
 
 pip install --upgrade dvc
@@ -18,10 +37,3 @@ dvc repro
 
 dvc dag
 
-aws configure
-
-# These are the credintials you saved after making an IAM account
-# I.e. `foo_accessKeys.csv`
-# Default Region Name should be whatever region you see you are on for AWS on the top right of the homepage
-# i.e. `us-west-2`
-# You can leave `Default output format [None]:` as blank/empty. Just click enter
