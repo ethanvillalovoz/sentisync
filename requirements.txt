@@ -15,3 +15,9 @@ xgboost
 lightgbm
 plotly
 nbformat
+Flask
+Flask_Cors
+joblib
+dvc
+dvc[s3]
+-e .
