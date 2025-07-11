@@ -181,7 +181,9 @@ def main():
             )
 
             # Save run ID and model info to a local JSON file
-            save_model_info(run.info.run_id, "lgbm_model", 'experiment_info.json')
+            artifact_uri = mlflow.get_artifact_uri()
+            model_path = f"{artifact_uri}/lgbm_model"
+            save_model_info(run.info.run_id, model_path, 'experiment_info.json')
 
             # Log the TF-IDF vectorizer file
             mlflow.log_artifact(os.path.join(root_dir, 'tfidf_vectorizer.pkl'))
