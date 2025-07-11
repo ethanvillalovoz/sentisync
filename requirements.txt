@@ -18,6 +18,5 @@ nbformat
 Flask
 Flask_Cors
 joblib
-dvc
-dvc[s3]
+dvc[s3]==3.23.0
 -e .
