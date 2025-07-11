@@ -13,3 +13,5 @@ imblearn
 optuna
 xgboost
 lightgbm
+plotly
+nbformat
