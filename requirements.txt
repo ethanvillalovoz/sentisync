@@ -10,3 +10,6 @@ dotenv
 boto3
 awscli
 imblearn
+optuna
+xgboost
+lightgbm
