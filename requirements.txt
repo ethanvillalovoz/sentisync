@@ -6,3 +6,6 @@ nltk
 scikit-learn
 wordcloud
 mlflow
+dotenv
+boto3
+awscli
