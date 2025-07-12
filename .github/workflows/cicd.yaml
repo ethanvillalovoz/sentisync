@@ -64,6 +64,10 @@ jobs:
     needs: build-and-push-ecr-image
     runs-on: self-hosted
     steps:
+      - name: Pre-clean Docker (free disk space)
+        run: |
+          docker system prune -af --volumes
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -87,7 +91,6 @@ jobs:
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker pull $IMAGE_URI
 
-      # Remove any existing container before starting a new one
       - name: Remove existing cnncls container if present
         run: |
           docker rm -fv cnncls || true
@@ -105,6 +108,6 @@ jobs:
             -e AWS_REGION=${{ secrets.AWS_REGION }} \
             $IMAGE_URI
 
-      - name: Cleanup Docker before deployment
+      - name: Cleanup Docker after deployment
         run: |
           docker system prune -af --volumes
