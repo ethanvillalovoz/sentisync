@@ -87,12 +87,7 @@ jobs:
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker pull $IMAGE_URI
 
-      # This line is a one time configuration step to ensure the container is stopped and removed if it exists.
-      # It can be commented out after the first successful deployment.
-      - name: Stop and remove container if running
-        run: |
-          docker ps -q --filter "name=cnncls" | grep -q . && docker stop cnncls && docker rm -fv cnncls || true
-
+      # Remove any existing container before starting a new one
       - name: Remove existing cnncls container if present
         run: |
           docker rm -fv cnncls || true
