@@ -269,5 +269,5 @@ def generate_trend_graph():
 # Main Entrypoint
 # ================================
 if __name__ == '__main__':
-    # Run the Flask app on all interfaces, port 5000, with debug mode enabled
-    app.run(host='0.0.0.0', port=5050, debug=True)
+    # Run the Flask app on all interfaces, port 8080, with debug mode enabled
+    app.run(host='0.0.0.0', port=8080, debug=True)
