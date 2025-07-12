@@ -4,12 +4,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const outputDiv = document.getElementById("output");
 
   // YouTube Data API key (replace with your own for production)
-  const API_KEY = "foobar"; // Replace with your actual API key
+  const API_KEY = CONFIG.API_KEY;
 
   // Backend API URL (update for production deployment)
-  // const API_URL = 'http://my-elb-2062136355.us-east-1.elb.amazonaws.com:80';
-  // const API_URL = 'http://localhost:5000/';
-  const API_URL = 'http://127.0.0.1:5050/';
+  const API_URL = CONFIG.API_URL;
 
   // Get the current tab's URL and check if it's a YouTube video
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
