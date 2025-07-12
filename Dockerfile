@@ -17,6 +17,7 @@ COPY . /app
 # Install Python dependencies
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN python3 -m nltk.downloader stopwords
 
 # Run the Flask app
 CMD ["python3", "flask_app/app.py"]

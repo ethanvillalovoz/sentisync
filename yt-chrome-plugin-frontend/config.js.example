@@ -1,5 +1,6 @@
 // config.js
 const CONFIG = {
   API_KEY: "your-youtube-api-key-here", // YouTube Data API key
+  // Th
   API_URL: "http://EC2-Public-IPv4-address:port/"  // or your local URL if in dev
 };
