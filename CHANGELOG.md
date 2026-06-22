@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Security policy and code of conduct for public issue and pull request handling.
+
+### Changed
+
+- Contributor setup now defaults to API runtime dependencies.
+- Manual deployment no longer injects AWS credentials into the running Flask container.
+
 ## v1.0.0 - Public Project Baseline
 
 Initial polished public baseline for SentiSync.

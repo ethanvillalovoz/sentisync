@@ -186,6 +186,10 @@ python -m unittest discover tests
 docker build -t sentisync-backend .
 ```
 
+## Contributing
+
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before submitting changes.
+
 ## AWS Deployment
 
 GitHub Actions includes a manual deployment path for AWS ECR + EC2. To use it:

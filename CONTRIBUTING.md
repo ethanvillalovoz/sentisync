@@ -16,9 +16,11 @@ Thanks for your interest in improving SentiSync. This project has three main sur
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements-api.txt
 python -m nltk.downloader stopwords wordnet
 ```
+
+Install `requirements.txt` only when working on the DVC/MLflow training pipeline. Install `requirements-experiments.txt` only when running the historical experiment notebooks.
 
 ## Verification
 
@@ -46,6 +48,7 @@ If your change affects the Chrome extension, load `yt-chrome-plugin-frontend/` t
 - Update the README or docs when setup, API, deployment, or pipeline behavior changes.
 - Add or update tests for deterministic backend behavior.
 - Do not commit local `.env` files, `yt-chrome-plugin-frontend/config.js`, API keys, AWS credentials, or generated cache files.
+- Follow the project code of conduct when participating in issues and pull requests.
 
 ## Reporting Issues
 
