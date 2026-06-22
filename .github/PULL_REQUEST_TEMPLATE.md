@@ -1,28 +1,32 @@
 # Pull Request
 
-Thank you for your contribution! Please fill out the following checklist and provide details about your changes.
+## Summary
 
-## Description
-
-<!-- Please include a summary of the change and which issue is fixed. Also include relevant motivation and context. -->
+<!-- What changed and why? -->
 
 Fixes #(issue)
 
-## Type of change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Documentation update
-- [ ] Other (please describe):
+## Area
 
-## Checklist
-- [ ] My code follows the project style guidelines
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation (if relevant)
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works (if applicable)
-- [ ] New and existing tests pass locally with my changes
+- [ ] Backend API
+- [ ] Chrome extension
+- [ ] DVC/MLflow pipeline
+- [ ] Docker/deployment
+- [ ] Documentation
+- [ ] Tests/CI
 
-## Additional context
+## Verification
 
-<!-- Add any other context about the PR here. -->
+- [ ] I ran `python -m unittest discover tests`
+- [ ] I ran Python compile checks for changed Python files
+- [ ] I built the Docker image, if backend dependencies or Docker changed
+- [ ] I manually tested the Chrome extension, if extension behavior changed
+- [ ] I updated docs for setup, API, deployment, or pipeline changes
+
+## Screenshots or logs
+
+<!-- Add screenshots, generated charts, API responses, or logs when useful. -->
+
+## Notes
+
+<!-- Anything reviewers should pay attention to? -->

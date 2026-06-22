@@ -1,17 +1,20 @@
 ---
-name: "✨ Feature Request"
-about: Suggest an idea for this project
+name: Feature Request
+about: Suggest an improvement to SentiSync
 labels: enhancement
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex: I'm always frustrated when [...]
+**Area**
+Backend API, Chrome extension, DVC/MLflow pipeline, Docker, AWS deployment, or docs?
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**Problem**
+What problem or limitation does this solve?
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Proposed solution**
+What would you like to happen?
+
+**Alternatives considered**
+What other approaches did you consider?
 
 **Additional context**
-Add any other context or screenshots about the feature request here.
+Add screenshots, diagrams, payloads, or links if useful.

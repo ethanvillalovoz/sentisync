@@ -1,23 +1,6 @@
-numpy
-pandas
-seaborn
-matplotlib
-nltk
-scikit-learn
-wordcloud
-mlflow
-dotenv
-boto3
-awscli
-imblearn
-optuna
-xgboost
-lightgbm
-plotly
-nbformat
-Flask
-Flask_Cors
-joblib
-dvc
+-r requirements-api.txt
+
 dvc[s3]
--e .
+mlflow
+python-dotenv
+seaborn

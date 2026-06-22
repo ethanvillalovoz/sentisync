@@ -1,0 +1,11 @@
+Flask
+Flask-Cors
+gunicorn
+lightgbm
+matplotlib
+nltk
+numpy
+pandas
+scikit-learn
+wordcloud
+-e .

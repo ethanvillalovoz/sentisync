@@ -1,3 +1,7 @@
+import os
+
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
+
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend for server-side image generation
 
@@ -6,13 +10,10 @@ from flask_cors import CORS
 import io
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-import mlflow
-import numpy as np
 import re
 import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from mlflow.tracking import MlflowClient
 import matplotlib.dates as mdates
 import pickle
 
@@ -21,6 +22,28 @@ import pickle
 # ================================
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+SENTIMENT_STOPWORD_EXCEPTIONS = {'not', 'but', 'however', 'no', 'yet'}
+lemmatizer = WordNetLemmatizer()
+
+
+def get_sentiment_stopwords():
+    """Return English stopwords while preserving sentiment-bearing words."""
+    try:
+        return set(stopwords.words('english')) - SENTIMENT_STOPWORD_EXCEPTIONS
+    except LookupError:
+        app.logger.warning("NLTK stopwords corpus is unavailable; continuing without stopword removal")
+        return set()
+
+
+def lemmatize_words(words):
+    """Lemmatize tokens, falling back to original tokens if WordNet is unavailable."""
+    try:
+        return [lemmatizer.lemmatize(word) for word in words]
+    except LookupError:
+        app.logger.warning("NLTK wordnet corpus is unavailable; continuing without lemmatization")
+        return words
+
 
 # ================================
 # Preprocessing Function
@@ -39,10 +62,9 @@ def preprocess_comment(comment):
         comment = comment.lower().strip()
         comment = re.sub(r'\n', ' ', comment)
         comment = re.sub(r'[^A-Za-z0-9\s!?.,]', '', comment)
-        stop_words = set(stopwords.words('english')) - {'not', 'but', 'however', 'no', 'yet'}
+        stop_words = get_sentiment_stopwords()
         comment = ' '.join([word for word in comment.split() if word not in stop_words])
-        lemmatizer = WordNetLemmatizer()
-        comment = ' '.join([lemmatizer.lemmatize(word) for word in comment.split()])
+        comment = ' '.join(lemmatize_words(comment.split()))
         return comment
     except Exception as e:
         print(f"Error in preprocessing comment: {e}")
@@ -61,11 +83,40 @@ def load_model(model_path, vectorizer_path):
         with open(vectorizer_path, 'rb') as file:
             vectorizer = pickle.load(file)
         return model, vectorizer
-    except Exception as e:
+    except Exception:
         raise
 
-# Load model and vectorizer at startup
-model, vectorizer = load_model("./lgbm_model.pkl", "./tfidf_vectorizer.pkl")  
+MODEL_PATH = os.environ.get("SENTISYNC_MODEL_PATH", "./lgbm_model.pkl")
+VECTORIZER_PATH = os.environ.get("SENTISYNC_VECTORIZER_PATH", "./tfidf_vectorizer.pkl")
+model = None
+vectorizer = None
+
+
+def get_model_and_vectorizer():
+    """Load model artifacts on first use so health checks do not require native ML libraries."""
+    global model, vectorizer
+
+    if model is not None and vectorizer is not None:
+        return model, vectorizer
+
+    try:
+        model, vectorizer = load_model(MODEL_PATH, VECTORIZER_PATH)
+        return model, vectorizer
+    except Exception as exc:
+        app.logger.exception("Failed to load sentiment model artifacts")
+        raise RuntimeError(
+            "Sentiment model artifacts could not be loaded. "
+            "Check SENTISYNC_MODEL_PATH, SENTISYNC_VECTORIZER_PATH, and native LightGBM dependencies."
+        ) from exc
+
+
+def predict_sentiments(comments):
+    """Transform comments and return model predictions."""
+    active_model, active_vectorizer = get_model_and_vectorizer()
+    transformed_comments = active_vectorizer.transform(comments)
+    dense_comments = transformed_comments.toarray()
+    predictions = active_model.predict(dense_comments)
+    return predictions.tolist() if hasattr(predictions, "tolist") else list(predictions)
 
 # ================================
 # API Endpoints
@@ -76,13 +127,18 @@ def home():
     """Basic health check endpoint."""
     return "Welcome to our flask api"
 
+@app.route('/health')
+def health():
+    """Machine-readable health check endpoint."""
+    return jsonify({"status": "ok", "service": "sentisync"})
+
 @app.route('/predict_with_timestamps', methods=['POST'])
 def predict_with_timestamps():
     """
     Predict sentiment for a list of comments with timestamps.
     Returns original comment, predicted sentiment, and timestamp.
     """
-    data = request.json
+    data = request.get_json(silent=True) or {}
     comments_data = data.get('comments')
     if not comments_data:
         return jsonify({"error": "No comments provided"}), 400
@@ -91,9 +147,7 @@ def predict_with_timestamps():
         comments = [item['text'] for item in comments_data]
         timestamps = [item['timestamp'] for item in comments_data]
         preprocessed_comments = [preprocess_comment(comment) for comment in comments]
-        transformed_comments = vectorizer.transform(preprocessed_comments)
-        dense_comments = transformed_comments.toarray()
-        predictions = model.predict(dense_comments).tolist()
+        predictions = predict_sentiments(preprocessed_comments)
         predictions = [str(pred) for pred in predictions]
     except Exception as e:
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
@@ -110,18 +164,14 @@ def predict():
     Predict sentiment for a list of comments.
     Returns original comment and predicted sentiment.
     """
-    data = request.json
+    data = request.get_json(silent=True) or {}
     comments = data.get('comments')
-    print("i am the comment: ", comments)
-    print("i am the comment type: ", type(comments))
     if not comments:
         return jsonify({"error": "No comments provided"}), 400
 
     try:
         preprocessed_comments = [preprocess_comment(comment) for comment in comments]
-        transformed_comments = vectorizer.transform(preprocessed_comments)
-        dense_comments = transformed_comments.toarray()
-        predictions = model.predict(dense_comments).tolist()
+        predictions = predict_sentiments(preprocessed_comments)
     except Exception as e:
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
 
@@ -139,7 +189,7 @@ def generate_chart():
     Returns PNG image.
     """
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         sentiment_counts = data.get('sentiment_counts')
         if not sentiment_counts:
             return jsonify({"error": "No sentiment counts provided"}), 400
@@ -181,7 +231,7 @@ def generate_wordcloud():
     Returns PNG image.
     """
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         comments = data.get('comments')
         if not comments:
             return jsonify({"error": "No comments provided"}), 400
@@ -193,7 +243,7 @@ def generate_wordcloud():
             height=400,
             background_color='black',
             colormap='Blues',
-            stopwords=set(stopwords.words('english')),
+            stopwords=get_sentiment_stopwords(),
             collocations=False
         ).generate(text)
 
@@ -213,7 +263,7 @@ def generate_trend_graph():
     Returns PNG image.
     """
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         sentiment_data = data.get('sentiment_data')
         if not sentiment_data:
             return jsonify({"error": "No sentiment data provided"}), 400
@@ -269,5 +319,6 @@ def generate_trend_graph():
 # Main Entrypoint
 # ================================
 if __name__ == '__main__':
-    # Run the Flask app on all interfaces, port 8080, with debug mode enabled
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    port = int(os.environ.get("PORT", "8080"))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host='0.0.0.0', port=port, debug=debug)

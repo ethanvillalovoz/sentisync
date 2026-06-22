@@ -1,45 +1,59 @@
-# Contributing to SentiSync
+# Contributing
 
-Thank you for your interest in contributing! We welcome all kinds of contributions: bug reports, feature requests, documentation improvements, and code changes.
+Thanks for your interest in improving SentiSync. This project has three main surfaces: the Flask backend, the Chrome extension, and the DVC/MLflow model pipeline. Please keep changes focused and explain which surface they affect.
 
-## How to Contribute
+## Good Contribution Areas
 
-1. **Fork the repository** and create your branch from `main`.
-2. **Clone your fork** and set up the project locally.
-3. **Make your changes** and ensure all tests pass.
-4. **Write clear commit messages** describing your changes.
-5. **Submit a pull request** using the [PR template](.github/PULL_REQUEST_TEMPLATE.md).
+- Backend API fixes, validation improvements, and endpoint tests.
+- Chrome extension UX improvements that keep the same backend contract.
+- DVC pipeline improvements for reproducible training and evaluation.
+- Documentation, setup, and deployment clarifications.
+- Small dependency or Docker improvements with verification.
 
-## Creating Issues
+## Local Setup
 
-- Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md) for bugs.
-- Use the [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) for new ideas or enhancements.
-- Please provide as much detail as possible, including steps to reproduce, expected behavior, and screenshots if relevant.
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python -m nltk.downloader stopwords wordnet
+```
 
-## Code Style
+## Verification
 
-- Follow PEP8 for Python code.
-- Comment your code, especially in complex sections.
-- Keep functions and classes focused and modular.
+Before opening a pull request, run:
 
-## Documentation
+```bash
+python -m py_compile \
+  flask_app/app.py \
+  src/data/data_ingestion.py \
+  src/data/data_preprocessing.py \
+  src/model/model_building.py \
+  src/model/model_evaluation.py \
+  src/model/register_model.py
 
-- Update the README or docs/ folder if your changes affect usage or setup.
-- Add docstrings to new functions and classes.
+python -m unittest discover tests
+docker build -t sentisync-backend .
+```
 
-## Community Guidelines
+If your change affects the Chrome extension, load `yt-chrome-plugin-frontend/` through `chrome://extensions` and test against a local or deployed backend.
 
-- Be respectful and constructive in all communications.
-- Review open issues and pull requests before starting work to avoid duplication.
-- If you’re unsure, open an issue to discuss your idea before submitting a PR.
+## Pull Request Guidelines
 
-## Useful Links
+- Keep each pull request scoped to one change.
+- Include screenshots for extension UI changes.
+- Update the README or docs when setup, API, deployment, or pipeline behavior changes.
+- Add or update tests for deterministic backend behavior.
+- Do not commit local `.env` files, `yt-chrome-plugin-frontend/config.js`, API keys, AWS credentials, or generated cache files.
 
-- [Project README](README.md)
-- [Issue Templates](.github/ISSUE_TEMPLATE/)
-- [PR Template](.github/PULL_REQUEST_TEMPLATE.md)
-- [Code of Conduct](https://opensource.guide/code-of-conduct/) (consider adding one!)
+## Reporting Issues
 
----
+Please include:
 
-Thank you for helping make SentiSync better!
+- The command or workflow you ran.
+- Backend, extension, Docker, or DVC context.
+- Expected behavior.
+- Actual behavior.
+- Python version, browser version, and operating system.
+- Screenshots, request payloads, or traceback output when helpful.

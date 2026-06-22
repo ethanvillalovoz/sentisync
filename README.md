@@ -1,260 +1,211 @@
-# SentiSync: Real-Time YouTube Sentiment Analysis
+# SentiSync
 
-Real-time YouTube sentiment analysis with a Chrome Extension and end-to-end MLOps pipeline using Flask, MLflow, DVC, Docker, and AWS.
+[![CI](https://github.com/ethanvillalovoz/sentisync/actions/workflows/ci.yml/badge.svg)](https://github.com/ethanvillalovoz/sentisync/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
----
+Real-time YouTube comment sentiment analysis with a Chrome extension, Flask inference API, LightGBM model, DVC pipeline, MLflow experiment tracking, Docker, and optional AWS deployment.
 
-## 🚀 Project Goals
+SentiSync turns a YouTube video page into a lightweight comment-intelligence dashboard: it fetches comments through the YouTube Data API, sends them to a Flask backend, predicts sentiment with a TF-IDF + LightGBM model, and renders summary metrics, sentiment distribution, trend charts, word clouds, and top comments in the browser extension popup.
 
-- Provide instant sentiment analysis for YouTube comments via a Chrome Extension.
-- Enable reproducible machine learning workflows with DVC and MLflow.
-- Deploy scalable backend services using Docker and AWS.
-- Demonstrate modern MLOps and cloud deployment best practices.
+## Demo
 
----
+![SentiSync Chrome extension demo](docs/examples/example_1.png)
 
-## 🖼️ What Does It Look Like?
+## What This Project Demonstrates
 
-- **Chrome Extension:** Fetches YouTube comments and displays sentiment insights.
-- **Backend API:** Serves predictions and visualizations.
-- **MLflow Dashboard:** Tracks experiments and model metrics.
-- ![Demo Screenshot](docs/examples/example_1.png) <!-- Add your own screenshot here -->
+- Chrome extension frontend for YouTube comment collection and visualization.
+- Flask API for sentiment inference and chart generation.
+- TF-IDF feature extraction with a trained LightGBM classifier.
+- DVC pipeline for data ingestion, preprocessing, model training, evaluation, and registration.
+- MLflow experiment logging for model comparison and reproducibility.
+- Dockerized backend with optional AWS ECR/EC2 deployment through GitHub Actions.
 
----
+## Architecture
 
-## 🛠️ Prerequisites
-
-- Python 3.11+
-- Node.js v12+ (for Chrome extension development)
-- Docker
-- AWS account (EC2, ECR setup)
-- Chrome browser (for extension)
-- [MLflow Tracking Server](https://mlflow.org/docs/latest/tracking.html) (optional, for experiment logging)
-
----
-
-## ⚡ Quickstart
-
-```sh
-conda create -n sentisync python=3.11
-conda activate sentisync
-pip install -r requirements.txt
+```mermaid
+flowchart LR
+    A[YouTube Video Page] --> B[Chrome Extension]
+    B -->|YouTube Data API| C[Comment Threads]
+    B -->|POST comments| D[Flask API]
+    D --> E[TF-IDF Vectorizer]
+    E --> F[LightGBM Model]
+    D --> G[Charts and Word Cloud]
+    D --> B
+    H[DVC Pipeline] --> E
+    H --> F
+    H --> I[MLflow Tracking]
 ```
 
-- Download and configure AWS CLI: [AWS CLI Install Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-- Configure AWS credentials:
-  ```sh
-  aws configure
-  ```
-- Initialize DVC:
-  ```sh
-  pip install --upgrade dvc
-  dvc init
-  dvc repro
-  dvc dag
-  ```
-- Run backend locally:
-  ```sh
-  python flask_app/app.py
-  ```
-- Build and run Docker image:
-  ```sh
-  docker build -t sentisync-backend .
-  docker run -d -p 8080:8080 --name=cnncls sentisync-backend
-  ```
+## Repository Structure
 
----
-
-## ⚙️ Configuration / Environment Variables
-
-- **AWS Credentials:**  
-  Set via GitHub secrets for CI/CD:
-  - `AWS_ACCESS_KEY_ID`
-  - `AWS_SECRET_ACCESS_KEY`
-  - `AWS_REGION`
-  - `ECR_REPOSITORY_NAME`
-- **MLflow Tracking URI:**  
-  Set in `.env` or as an environment variable:
-  ```
-  MLFLOW_TRACKING_URI=http://<your-mlflow-server>:5000/
-  ```
-- **Chrome Extension API URL:**  
-  Set in `yt-chrome-plugin-frontend/config.js`:
-  ```js
-  API_URL: "http://<your-ec2-public-ip>:8080/"
-  ```
-
----
-
-## 📁 Directory Structure
-
-```
+```text
 sentisync/
-├── flask_app/                # Backend Flask API
-├── yt-chrome-plugin-frontend # Chrome extension frontend
-├── src/                      # Data preprocessing & model scripts
-├── notebooks/                # Jupyter notebooks for experiments
-├── data/                     # Datasets
-├── .github/workflows/        # CI/CD workflows
-├── Dockerfile                # Backend Docker build
-├── requirements.txt          # Python dependencies
-├── dvc.yaml, dvc.lock        # DVC pipeline configs
-├── README.md                 # Project documentation
-└── docs/                     # Additional documentation (recommended as README grows)
+|-- flask_app/                  # Flask inference API and visualization endpoints
+|-- yt-chrome-plugin-frontend/  # Manifest V3 Chrome extension
+|-- src/                        # DVC pipeline scripts for data/model workflows
+|-- notebooks/                  # Experiment notebooks and comparison artifacts
+|-- docs/examples/              # Screenshots and deployment examples
+|-- tests/                      # Backend smoke tests
+|-- dvc.yaml                    # Reproducible ML pipeline definition
+|-- params.yaml                 # Pipeline and model parameters
+|-- Dockerfile                  # Backend container
+|-- requirements-api.txt        # Flask API runtime dependencies
+|-- requirements.txt            # DVC and MLflow pipeline dependencies
+|-- requirements-experiments.txt # Optional notebook dependencies
+|-- lgbm_model.pkl              # Trained LightGBM model artifact
+|-- tfidf_vectorizer.pkl        # Trained TF-IDF vectorizer artifact
+`-- setup.py
 ```
 
----
+## Quick Start
 
-## 🚀 Deployment & Setup Guide
+Create a Python environment and install dependencies:
 
-### Environment Setup
+```bash
+git clone https://github.com/ethanvillalovoz/sentisync.git
+cd sentisync
 
-```sh
-conda create -n youtube python=3.11 -y
-conda activate youtube
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements-api.txt
+python -m nltk.downloader stopwords wordnet
+```
+
+If you want to run the full DVC and MLflow pipeline, install the pipeline dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-### DVC
+If you want to run the historical experiment notebooks, install the optional experiment dependencies:
 
-```sh
-dvc init
+```bash
+pip install -r requirements-experiments.txt
+```
+
+On macOS, LightGBM inference may also require the OpenMP runtime:
+
+```bash
+brew install libomp
+```
+
+Run the Flask backend:
+
+```bash
+python flask_app/app.py
+```
+
+The API runs on `http://localhost:8080` by default.
+
+## Chrome Extension Setup
+
+1. Copy the example config:
+
+   ```bash
+   cp yt-chrome-plugin-frontend/config.js.example yt-chrome-plugin-frontend/config.js
+   ```
+
+2. Edit `yt-chrome-plugin-frontend/config.js`:
+
+   ```js
+   const CONFIG = {
+     API_KEY: "your-youtube-data-api-key",
+     API_URL: "http://localhost:8080"
+   };
+   ```
+
+3. Open Chrome and go to `chrome://extensions`.
+4. Enable Developer Mode.
+5. Select "Load unpacked" and choose `yt-chrome-plugin-frontend/`.
+6. Open a YouTube video page and launch the SentiSync extension.
+
+## API Endpoints
+
+| Endpoint | Method | Purpose |
+| --- | --- | --- |
+| `/health` | `GET` | Machine-readable service health check |
+| `/predict` | `POST` | Predict sentiment for a list of comments |
+| `/predict_with_timestamps` | `POST` | Predict sentiment while preserving comment timestamps |
+| `/generate_chart` | `POST` | Generate sentiment distribution pie chart |
+| `/generate_wordcloud` | `POST` | Generate a word cloud from comments |
+| `/generate_trend_graph` | `POST` | Generate sentiment trend visualization over time |
+
+Example prediction request:
+
+```bash
+curl -X POST http://localhost:8080/predict \
+  -H "Content-Type: application/json" \
+  -d '{"comments":["This video is awesome","The explanation was confusing"]}'
+```
+
+## Docker
+
+Build and run the backend image:
+
+```bash
+docker build -t sentisync-backend .
+docker run --rm -p 8080:8080 --name sentisync-backend sentisync-backend
+```
+
+## Reproducing The ML Pipeline
+
+The DVC pipeline is defined in `dvc.yaml`:
+
+```bash
+pip install -r requirements.txt
 dvc repro
 dvc dag
 ```
 
-### AWS CLI
+Main stages:
 
-```sh
-aws configure
+1. `data_ingestion`: download and split the source sentiment dataset.
+2. `data_preprocessing`: normalize and lemmatize comments.
+3. `model_building`: train the TF-IDF + LightGBM model.
+4. `model_evaluation`: log metrics and artifacts to MLflow.
+5. `model_registration`: register the selected model from MLflow metadata.
+
+Set `MLFLOW_TRACKING_URI` in your shell or `.env` file when using a remote MLflow tracking server.
+
+## Verification
+
+Run the same checks used by CI:
+
+```bash
+python -m py_compile \
+  flask_app/app.py \
+  src/data/data_ingestion.py \
+  src/data/data_preprocessing.py \
+  src/model/model_building.py \
+  src/model/model_evaluation.py \
+  src/model/register_model.py
+
+python -m unittest discover tests
+docker build -t sentisync-backend .
 ```
 
-### API Demo (using Postman)
+## AWS Deployment
 
-- Endpoint: `http://localhost:5000/predict`
-- Example JSON payload:
-  ```json
-  {
-      "comments": ["This video is awesome! I loved a lot", "Very bad explanation. poor video"]
-  }
-  ```
+GitHub Actions includes a manual deployment path for AWS ECR + EC2. To use it:
 
-### Chrome Extension
+1. Configure repository secrets:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+   - `AWS_REGION`
+   - `ECR_REPOSITORY_NAME`
+2. Register a self-hosted runner on the EC2 instance that should run the backend.
+3. Run the `CI` workflow manually with `deploy=true`.
 
-- Load your extension at `chrome://extensions`
+Normal pushes and pull requests run tests and Docker build only. Deployment is intentionally manual so public contributions do not attempt to use private infrastructure.
 
-### How to get YouTube API key from GCP
+## Notes
 
-- [YouTube API Key Tutorial](https://www.youtube.com/watch?v=LLAZUTbc97I)
+- `yt-chrome-plugin-frontend/config.js` is ignored by Git so API keys and deployment URLs stay local.
+- The included model artifacts let the Flask API run immediately after dependency installation.
+- The notebooks are preserved as experiment records; the DVC scripts are the reproducible pipeline entry points.
 
----
+## License
 
-### AWS CI/CD Deployment with GitHub Actions
-
-#### 1. Login to AWS Console
-
-#### 2. Create IAM User for Deployment
-
-- **Access Needed:**
-  - EC2 (virtual machine)
-  - ECR (Elastic Container Registry for Docker images)
-- **Policies:**
-  - `AmazonEC2ContainerRegistryFullAccess`
-  - `AmazonEC2FullAccess`
-
-#### 3. Create ECR Repository
-
-- Save the URI (example):  
-  `315865595366.dkr.ecr.us-east-1.amazonaws.com/youtube`
-
-#### 4. Create EC2 Machine (Ubuntu)
-
-#### 5. Install Docker on EC2
-
-```sh
-sudo apt-get update -y
-sudo apt-get upgrade
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker ubuntu
-newgrp docker
-```
-
-#### 6. Configure EC2 as Self-Hosted Runner
-
-- Go to GitHub: `Settings > Actions > Runners > New self-hosted runner`
-- Choose OS and run setup commands on EC2
-
-#### 7. Setup GitHub Secrets
-
-```text
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=us-east-1
-AWS_ECR_LOGIN_URI=566373416292.dkr.ecr.ap-south-1.amazonaws.com
-ECR_REPOSITORY_NAME=simple-app
-```
-
----
-
-## ❓ FAQ / Troubleshooting
-
-- **Q:** API returns "Error fetching sentiment predictions"  
-  **A:** Check Docker logs for missing model files or NLTK data. Ensure `lgbm_model.pkl` and `tfidf_vectorizer.pkl` are present and `RUN python3 -m nltk.downloader stopwords` is in your Dockerfile.
-
-- **Q:** Chrome extension can't connect to backend  
-  **A:** Verify EC2 security group allows inbound traffic on port 8080. Confirm API URL in `config.js` matches your EC2 public IP and port.
-
-- **Q:** DVC or MLflow not working  
-  **A:** Ensure remote tracking URIs and credentials are set correctly in `.env`.
-
----
-
-## 🏗️ Architecture
-
-```mermaid
-flowchart TD
-    A[Chrome Extension] -->|Fetch comments| B[Flask API]
-    B -->|Predict sentiment| C[ML Model]
-    B -->|Log experiment| D[MLflow Server]
-    B -->|Serve results| A
-    E[DVC] --> B
-```
-
----
-
-## 🤝 Contributors
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
-
----
-
-## 📝 Issue & PR Templates
-
-- Bug, feature, and idea templates are available in `.github/ISSUE_TEMPLATE/`.
-- PR template is available in `.github/PULL_REQUEST_TEMPLATE.md`.
-
----
-
-## 📚 Further Documentation
-
-As the project grows, move extended guides and technical docs to the `docs/` folder.
-
----
-
-## 🏆 SOLID Principles
-
-This project aims for maintainability and scalability by following SOLID principles in code structure.
-
----
-
-## 📈 Future Goals
-
-- Add more ML models and experiment tracking.
-- Improve frontend UX and visualizations.
-- Expand deployment options (Kubernetes, serverless).
-- Add user authentication and personalization.
-
----
-
-Feel free to open issues or PRs for suggestions, improvements, or bug reports. Your feedback is valuable!
+This project is released under the [MIT License](LICENSE).
