@@ -10,7 +10,15 @@ SentiSync turns a YouTube video page into a lightweight comment-intelligence das
 
 ## Demo
 
-![SentiSync Chrome extension demo](docs/examples/example_1.png)
+SentiSync is not currently hosted as a public live app because the extension depends on a running Flask backend, a YouTube Data API key, and local or deployed model artifacts. The public demo is therefore a screenshot walkthrough of the Chrome extension connected to the backend.
+
+![SentiSync summary dashboard](docs/examples/demo-summary.jpg)
+
+| Sentiment trends | Word cloud and top comments |
+| --- | --- |
+| ![SentiSync sentiment trend view](docs/examples/demo-trends.jpg) | ![SentiSync word cloud and comment ranking view](docs/examples/demo-wordcloud.jpg) |
+
+See [Demo Strategy](docs/demo-strategy.md) for the public demo plan and why this repo avoids linking to a broken hosted backend.
 
 ## What This Project Demonstrates
 
@@ -120,6 +128,17 @@ The API runs on `http://localhost:8080` by default.
 4. Enable Developer Mode.
 5. Select "Load unpacked" and choose `yt-chrome-plugin-frontend/`.
 6. Open a YouTube video page and launch the SentiSync extension.
+
+## Demo Availability
+
+The screenshots in this README show the intended extension workflow with the backend running. To reproduce the demo locally, you need:
+
+- The Flask API running at `http://localhost:8080` or another URL set in `yt-chrome-plugin-frontend/config.js`.
+- A valid YouTube Data API key in the extension config.
+- The included `lgbm_model.pkl` and `tfidf_vectorizer.pkl` artifacts.
+- Chrome Developer Mode enabled with `yt-chrome-plugin-frontend/` loaded as an unpacked extension.
+
+This repo does not publish a public "Live Demo" link because the extension would fail without those services and credentials. A video or GIF walkthrough is the recommended public demo format.
 
 ## API Endpoints
 
