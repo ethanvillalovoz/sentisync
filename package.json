@@ -1,0 +1,12 @@
+{
+  "name": "sentisync-extension",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:frontend": "node --test tests/frontend/*.test.mjs",
+    "check:frontend": "npm run test:frontend && node --check yt-chrome-plugin-frontend/popup.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

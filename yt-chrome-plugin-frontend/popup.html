@@ -1,116 +1,107 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>YouTube Comment Insights</title>
-  <style>
-    /* ================================
-       Dark Theme Styling
-       ================================ */
-    body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      background-color: #1e1e1e;
-      color: #f1f1f1;
-      margin: 0;
-      box-sizing: border-box;
-      width: 320px; /* Set a width that fits the Chrome extension popup */
-    }
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>SentiSync</title>
+    <link rel="icon" href="icons/icon-48.png" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="https://github.com/ethanvillalovoz/sentisync" target="_blank" rel="noreferrer">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span>
+            <strong>SentiSync</strong>
+            <small>Comment intelligence</small>
+          </span>
+        </a>
+        <span class="mode-badge" id="mode-badge">Local</span>
+      </header>
 
-    /* ================================
-       Header Styling
-       ================================ */
-    h1 {
-      font-size: 20px;
-      color: #ffffff;
-    }
+      <main>
+        <section class="intro" id="intro-view" aria-labelledby="intro-title">
+          <p class="eyebrow">YouTube sentiment analysis</p>
+          <h1 id="intro-title">Read the room, not every comment.</h1>
+          <p class="intro-copy">
+            Analyze the current video's conversation with a reproducible TF-IDF and LightGBM pipeline.
+          </p>
+          <div class="video-context" id="video-context">
+            <span class="context-label">Current tab</span>
+            <strong id="video-title">Detecting YouTube video...</strong>
+          </div>
+          <button class="primary-action" id="analyze-button" type="button" disabled>
+            Analyze comments
+          </button>
+          <p class="status-copy" id="status-copy" aria-live="polite">Checking the active tab.</p>
+        </section>
 
-    /* ================================
-       Section Styling
-       ================================ */
-    .section {
-      margin-bottom: 15px;
-    }
-    .section-title {
-      font-weight: bold;
-      color: #0099ff;
-      margin-top: 10px;
-      font-size: 16px;
-    }
+        <section class="loading-view" id="loading-view" aria-labelledby="loading-title" hidden>
+          <p class="eyebrow">Analysis running</p>
+          <h2 id="loading-title">Building the signal.</h2>
+          <ol class="pipeline-list" id="pipeline-list">
+            <li data-step="comments"><span>01</span><strong>Collect comments</strong></li>
+            <li data-step="features"><span>02</span><strong>Transform text</strong></li>
+            <li data-step="inference"><span>03</span><strong>Run inference</strong></li>
+            <li data-step="summary"><span>04</span><strong>Summarize discussion</strong></li>
+          </ol>
+        </section>
 
-    /* ================================
-       Comment List Styling
-       ================================ */
-    .comment-list {
-      list-style: none;
-      padding: 0;
-    }
-    .comment-item {
-      margin: 8px 0;
-      padding: 8px;
-      background-color: #444;
-      border-radius: 4px;
-    }
-    .comment-sentiment {
-      font-weight: bold;
-      color: #ffffff;
-    }
+        <section class="results-view" id="results-view" aria-labelledby="results-title" hidden>
+          <div class="results-heading">
+            <div>
+              <p class="eyebrow">Comment pulse</p>
+              <h2 id="results-title">Audience signal</h2>
+            </div>
+            <button class="text-action" id="reanalyze-button" type="button">Refresh</button>
+          </div>
 
-    /* ================================
-       Image Styling (for charts/wordclouds)
-       ================================ */
-    img {
-      width: 100%;
-      margin-top: 20px;
-    }
+          <p class="video-name" id="result-video-title"></p>
 
-    /* ================================
-       Metrics Styling
-       ================================ */
-    .metrics-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-    }
-    .metric {
-      width: 48%;
-      background-color: #444;
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 4px;
-      text-align: center;
-      box-sizing: border-box;
-    }
-    .metric-title {
-      font-size: 12px;
-      color: #cccccc;
-    }
-    .metric-value {
-      font-size: 22px;
-      font-weight: bold;
-      color: #ffffff;
-      margin-top: 5px;
-    }
-  </style>
-</head>
-<body>
-  <!-- ================================
-       Popup Header
-       ================================ -->
-  <h1>YouTube Comment Insights</h1>
+          <div class="metrics-grid" aria-label="Analysis summary">
+            <div class="metric"><span>Analyzed</span><strong id="metric-total">0</strong></div>
+            <div class="metric"><span>Positive</span><strong id="metric-positive">0%</strong></div>
+            <div class="metric"><span>Signal</span><strong id="metric-score">0.0</strong></div>
+          </div>
 
-  <!-- ================================
-       Output Section (populated by JS)
-       ================================ -->
-  <div id="output" class="section"></div>
+          <div class="view-tabs" role="tablist" aria-label="Analysis views">
+            <button class="tab-button is-active" id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-panel">Overview</button>
+            <button class="tab-button" id="comments-tab" type="button" role="tab" aria-selected="false" aria-controls="comments-panel">Comments</button>
+          </div>
 
-  <!-- ================================
-      API Keys (populated by JS)
-      ================================ -->
-  <script src="config.js"></script>
+          <div class="tab-panel" id="overview-panel" role="tabpanel" aria-labelledby="overview-tab">
+            <section class="analysis-section" aria-labelledby="distribution-title">
+              <div class="section-heading">
+                <h3 id="distribution-title">Distribution</h3>
+                <span id="distribution-count">0 comments</span>
+              </div>
+              <div class="distribution" id="distribution"></div>
+            </section>
 
-  <!-- ================================
-       Popup Script
-       ================================ -->
-  <script src="popup.js"></script>
-</body>
+            <section class="analysis-section" aria-labelledby="trend-title">
+              <div class="section-heading">
+                <h3 id="trend-title">Conversation trend</h3>
+                <span>Oldest to newest</span>
+              </div>
+              <div class="trend-chart" id="trend-chart" aria-label="Sentiment trend chart"></div>
+            </section>
+          </div>
+
+          <div class="tab-panel" id="comments-panel" role="tabpanel" aria-labelledby="comments-tab" hidden>
+            <ol class="comment-list" id="comment-list"></ol>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span>TF-IDF + LightGBM</span>
+        <span id="footer-status">Waiting</span>
+      </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script type="module" src="popup.js"></script>
+  </body>
 </html>

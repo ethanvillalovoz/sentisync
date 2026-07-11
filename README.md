@@ -1,176 +1,100 @@
 # SentiSync
 
+Comment intelligence for YouTube, built as a Chrome extension backed by a reproducible TF-IDF and LightGBM pipeline.
+
 [![CI](https://github.com/ethanvillalovoz/sentisync/actions/workflows/ci.yml/badge.svg)](https://github.com/ethanvillalovoz/sentisync/actions/workflows/ci.yml)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-111111.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-111111.svg)](LICENSE)
 
-Real-time YouTube comment sentiment analysis with a Chrome extension, Flask inference API, LightGBM model, DVC pipeline, MLflow experiment tracking, Docker, and optional AWS deployment.
+<p align="center">
+  <img src="docs/media/sentisync-demo.gif" width="390" alt="SentiSync analyzing a YouTube discussion and switching from audience overview to comments" />
+</p>
 
-SentiSync turns a YouTube video page into a lightweight comment-intelligence dashboard: it fetches comments through the YouTube Data API, sends them to a Flask backend, predicts sentiment with a TF-IDF + LightGBM model, and renders summary metrics, sentiment distribution, trend charts, word clouds, and top comments in the browser extension popup.
+## Product
 
-## Demo
+SentiSync turns a noisy comment section into three inspectable signals: sentiment distribution, conversation trend, and representative comments. The extension is intentionally compact, keeps raw text visible, and labels its deterministic demo separately from live inference.
 
-SentiSync is not currently hosted as a public live app because the extension depends on a running Flask backend, a YouTube Data API key, and local or deployed model artifacts. The public demo is therefore a screenshot walkthrough of the Chrome extension connected to the backend.
-
-![SentiSync summary dashboard](docs/examples/demo-summary.jpg)
-
-| Sentiment trends | Word cloud and top comments |
-| --- | --- |
-| ![SentiSync sentiment trend view](docs/examples/demo-trends.jpg) | ![SentiSync word cloud and comment ranking view](docs/examples/demo-wordcloud.jpg) |
-
-See [Demo Strategy](docs/demo-strategy.md) for the public demo plan and why this repo avoids linking to a broken hosted backend.
-
-## What This Project Demonstrates
-
-- Chrome extension frontend for YouTube comment collection and visualization.
-- Flask API for sentiment inference and chart generation.
-- TF-IDF feature extraction with a trained LightGBM classifier.
-- DVC pipeline for data ingestion, preprocessing, model training, evaluation, and registration.
-- MLflow experiment logging for model comparison and reproducibility.
-- Dockerized backend with optional AWS ECR/EC2 deployment through GitHub Actions.
+The YouTube API key stays on the Flask server. The extension sends only a validated video ID, receives normalized comment records, and then requests predictions from the included model artifacts.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    A[YouTube Video Page] --> B[Chrome Extension]
-    B -->|YouTube Data API| C[Comment Threads]
-    B -->|POST comments| D[Flask API]
-    D --> E[TF-IDF Vectorizer]
-    E --> F[LightGBM Model]
-    D --> G[Charts and Word Cloud]
-    D --> B
-    H[DVC Pipeline] --> E
-    H --> F
-    H --> I[MLflow Tracking]
+    Y[YouTube video] --> X[Chrome extension]
+    X -->|video ID| A[Flask API]
+    A -->|server-side key| D[YouTube Data API]
+    D --> A
+    A --> T[TF-IDF vectorizer]
+    T --> L[LightGBM classifier]
+    L --> X
+    P[DVC pipeline] --> T
+    P --> L
+    P --> M[MLflow experiments]
 ```
 
-## Repository Structure
+| Surface | Responsibility |
+| --- | --- |
+| Chrome extension | Current-tab detection, analysis workflow, safe DOM rendering, and visual summaries |
+| Flask API | Input limits, comment retrieval, preprocessing, inference, and legacy chart endpoints |
+| DVC | Deterministic data ingestion, preprocessing, model training, evaluation, and registration |
+| MLflow | Experiment parameters, metrics, model signatures, and comparison artifacts |
 
-```text
-sentisync/
-|-- flask_app/                  # Flask inference API and visualization endpoints
-|-- yt-chrome-plugin-frontend/  # Manifest V3 Chrome extension
-|-- src/                        # DVC pipeline scripts for data/model workflows
-|-- notebooks/                  # Experiment notebooks and comparison artifacts
-|-- docs/examples/              # Screenshots and deployment examples
-|-- tests/                      # Backend smoke tests
-|-- dvc.yaml                    # Reproducible ML pipeline definition
-|-- params.yaml                 # Pipeline and model parameters
-|-- Dockerfile                  # Backend container
-|-- requirements-api.txt        # Flask API runtime dependencies
-|-- requirements.txt            # DVC and MLflow pipeline dependencies
-|-- requirements-experiments.txt # Optional notebook dependencies
-|-- lgbm_model.pkl              # Trained LightGBM model artifact
-|-- tfidf_vectorizer.pkl        # Trained TF-IDF vectorizer artifact
-`-- setup.py
-```
+## Preview The Product
 
-## Quick Start
-
-Create a Python environment and install dependencies:
+The static preview requires no API key or model runtime:
 
 ```bash
-git clone https://github.com/ethanvillalovoz/sentisync.git
-cd sentisync
+python -m http.server 3000 --directory yt-chrome-plugin-frontend
+```
 
-python -m venv .venv
+Open [http://localhost:3000/popup.html?demo=1](http://localhost:3000/popup.html?demo=1). Demo responses are bundled fixtures and are visibly labeled as such.
+
+## Run Live Analysis
+
+### 1. Start The API
+
+```bash
+cp .env.example .env
+python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
 pip install -r requirements-api.txt
 python -m nltk.downloader stopwords wordnet
+python flask_app/app.py
 ```
 
-If you want to run the full DVC and MLflow pipeline, install the pipeline dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-If you want to run the historical experiment notebooks, install the optional experiment dependencies:
-
-```bash
-pip install -r requirements-experiments.txt
-```
-
-On macOS, LightGBM inference may also require the OpenMP runtime:
+Set `YOUTUBE_API_KEY` in `.env`. On macOS, LightGBM also needs OpenMP:
 
 ```bash
 brew install libomp
 ```
 
-Run the Flask backend:
+The API runs at [http://localhost:8080](http://localhost:8080) and exposes a machine-readable health check at `/health`.
 
-```bash
-python flask_app/app.py
-```
+### 2. Load The Extension
 
-The API runs on `http://localhost:8080` by default.
+1. Open `chrome://extensions` and enable Developer Mode.
+2. Select **Load unpacked** and choose `yt-chrome-plugin-frontend/`.
+3. Copy the generated extension ID.
+4. Add `chrome-extension://<extension-id>` to `SENTISYNC_ALLOWED_ORIGINS` and restart the API.
+5. Open a standard YouTube watch page and launch SentiSync.
 
-## Chrome Extension Setup
+For a remote API, update `API_URL` in `yt-chrome-plugin-frontend/config.js` and add that origin to `host_permissions` in `manifest.json` before loading the extension.
 
-1. Copy the example config:
-
-   ```bash
-   cp yt-chrome-plugin-frontend/config.js.example yt-chrome-plugin-frontend/config.js
-   ```
-
-2. Edit `yt-chrome-plugin-frontend/config.js`:
-
-   ```js
-   const CONFIG = {
-     API_KEY: "your-youtube-data-api-key",
-     API_URL: "http://localhost:8080"
-   };
-   ```
-
-3. Open Chrome and go to `chrome://extensions`.
-4. Enable Developer Mode.
-5. Select "Load unpacked" and choose `yt-chrome-plugin-frontend/`.
-6. Open a YouTube video page and launch the SentiSync extension.
-
-## Demo Availability
-
-The screenshots in this README show the intended extension workflow with the backend running. To reproduce the demo locally, you need:
-
-- The Flask API running at `http://localhost:8080` or another URL set in `yt-chrome-plugin-frontend/config.js`.
-- A valid YouTube Data API key in the extension config.
-- The included `lgbm_model.pkl` and `tfidf_vectorizer.pkl` artifacts.
-- Chrome Developer Mode enabled with `yt-chrome-plugin-frontend/` loaded as an unpacked extension.
-
-This repo does not publish a public "Live Demo" link because the extension would fail without those services and credentials. A video or GIF walkthrough is the recommended public demo format.
-
-## API Endpoints
+## API Contract
 
 | Endpoint | Method | Purpose |
 | --- | --- | --- |
-| `/health` | `GET` | Machine-readable service health check |
-| `/predict` | `POST` | Predict sentiment for a list of comments |
-| `/predict_with_timestamps` | `POST` | Predict sentiment while preserving comment timestamps |
-| `/generate_chart` | `POST` | Generate sentiment distribution pie chart |
-| `/generate_wordcloud` | `POST` | Generate a word cloud from comments |
-| `/generate_trend_graph` | `POST` | Generate sentiment trend visualization over time |
+| `/health` | `GET` | Service health without loading model artifacts |
+| `/youtube/comments` | `POST` | Retrieve at most 500 comments with a server-side API key |
+| `/predict` | `POST` | Classify a bounded list of comment strings |
+| `/predict_with_timestamps` | `POST` | Preserve timestamps and author identifiers during inference |
+| `/generate_chart` | `POST` | Return a sentiment distribution PNG |
+| `/generate_wordcloud` | `POST` | Return a preprocessed word-cloud PNG |
+| `/generate_trend_graph` | `POST` | Return an aggregate sentiment trend PNG |
 
-Example prediction request:
+Requests are limited to 1 MB, comment batches to 500 items, and individual comments to 2,000 characters. Public errors do not expose model paths, API responses, or stack traces.
 
-```bash
-curl -X POST http://localhost:8080/predict \
-  -H "Content-Type: application/json" \
-  -d '{"comments":["This video is awesome","The explanation was confusing"]}'
-```
-
-## Docker
-
-Build and run the backend image:
-
-```bash
-docker build -t sentisync-backend .
-docker run --rm -p 8080:8080 --name sentisync-backend sentisync-backend
-```
-
-## Reproducing The ML Pipeline
-
-The DVC pipeline is defined in `dvc.yaml`:
+## Reproduce The Model
 
 ```bash
 pip install -r requirements.txt
@@ -178,57 +102,40 @@ dvc repro
 dvc dag
 ```
 
-Main stages:
+The pipeline downloads a labeled Reddit sentiment dataset, performs a seeded train/test split, preprocesses text, fits trigram TF-IDF features, trains a three-class LightGBM model, and records evaluation artifacts through MLflow. Model parameters live in [`params.yaml`](params.yaml); data and generated experiment files remain outside Git through DVC and `.gitignore`.
 
-1. `data_ingestion`: download and split the source sentiment dataset.
-2. `data_preprocessing`: normalize and lemmatize comments.
-3. `model_building`: train the TF-IDF + LightGBM model.
-4. `model_evaluation`: log metrics and artifacts to MLflow.
-5. `model_registration`: register the selected model from MLflow metadata.
+Historical notebooks are retained as source-only experiment records with outputs stripped. Curated confusion matrices and MLflow comparisons remain in `notebooks/results/`.
 
-Set `MLFLOW_TRACKING_URI` in your shell or `.env` file when using a remote MLflow tracking server.
+## Repository Map
+
+```text
+flask_app/                   inference and YouTube retrieval API
+yt-chrome-plugin-frontend/   Manifest V3 extension and deterministic demo
+src/data/                    DVC ingestion and preprocessing stages
+src/model/                   training, evaluation, and registration stages
+tests/                       API and extension contract tests
+notebooks/                   output-free historical experiments
+notebooks/results/           curated experiment figures
+docs/media/                  verified product captures
+```
 
 ## Verification
 
-Run the same checks used by CI:
-
 ```bash
-python -m py_compile \
-  flask_app/app.py \
-  src/data/data_ingestion.py \
-  src/data/data_preprocessing.py \
-  src/model/model_building.py \
-  src/model/model_evaluation.py \
-  src/model/register_model.py
-
 python -m unittest discover tests
+npm run check:frontend
 docker build -t sentisync-backend .
 ```
 
-## Contributing
+CI runs Python 3.12 checks, extension tests, and a container build on every pull request. AWS publication and deployment remain manual and require repository secrets.
 
-Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before submitting changes.
+## Limitations
 
-## AWS Deployment
-
-GitHub Actions includes a manual deployment path for AWS ECR + EC2. To use it:
-
-1. Configure repository secrets:
-   - `AWS_ACCESS_KEY_ID`
-   - `AWS_SECRET_ACCESS_KEY`
-   - `AWS_REGION`
-   - `ECR_REPOSITORY_NAME`
-2. Register a self-hosted runner on the EC2 instance that should run the backend.
-3. Run the `CI` workflow manually with `deploy=true`.
-
-Normal pushes and pull requests run tests and Docker build only. Deployment is intentionally manual so public contributions do not attempt to use private infrastructure.
-
-## Notes
-
-- `yt-chrome-plugin-frontend/config.js` is ignored by Git so API keys and deployment URLs stay local.
-- The included model artifacts let the Flask API run immediately after dependency installation.
-- The notebooks are preserved as experiment records; the DVC scripts are the reproducible pipeline entry points.
+- The classifier transfers labels learned from Reddit data to YouTube comments; domain shift should be measured before treating scores as production analytics.
+- Sentiment labels compress sarcasm, mixed opinions, and context into three classes.
+- YouTube quotas and disabled comments can produce sparse or unavailable analyses.
+- Pickled model artifacts must only be loaded from trusted repository releases.
 
 ## License
 
-This project is released under the [MIT License](LICENSE).
+Released under the [MIT License](LICENSE).
