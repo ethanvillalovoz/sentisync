@@ -17,6 +17,11 @@ Do not commit:
 - YouTube Data API keys.
 - AWS credentials.
 - `.env` files.
-- `yt-chrome-plugin-frontend/config.js`.
 
-Use `yt-chrome-plugin-frontend/config.js.example` for local extension setup.
+The tracked extension config contains only a public API origin. Keep `YOUTUBE_API_KEY` on the Flask server.
+
+## Sensitive Boundaries
+
+- Configure allowed browser and extension origins with `SENTISYNC_ALLOWED_ORIGINS`.
+- Treat `lgbm_model.pkl` and `tfidf_vectorizer.pkl` as trusted executable artifacts. Python pickle files can execute code while loading; do not replace them with unreviewed downloads.
+- Do not include raw comments, user identifiers, cloud credentials, or production extension IDs in issues and screenshots.

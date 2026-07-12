@@ -36,6 +36,7 @@ python -m py_compile \
   src/model/register_model.py
 
 python -m unittest discover tests
+npm run check:frontend
 docker build -t sentisync-backend .
 ```
 
@@ -47,7 +48,7 @@ If your change affects the Chrome extension, load `yt-chrome-plugin-frontend/` t
 - Include screenshots for extension UI changes.
 - Update the README or docs when setup, API, deployment, or pipeline behavior changes.
 - Add or update tests for deterministic backend behavior.
-- Do not commit local `.env` files, `yt-chrome-plugin-frontend/config.js`, API keys, AWS credentials, or generated cache files.
+- Do not commit local `.env` files, API keys, AWS credentials, raw comment exports, or generated cache files.
 - Follow the project code of conduct when participating in issues and pull requests.
 
 ## Reporting Issues

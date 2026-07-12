@@ -1,7 +1,7 @@
 -r requirements.txt
 
-imbalanced-learn
-nbformat
-optuna
-plotly
-xgboost
+imbalanced-learn>=0.14,<1
+nbformat>=5.10,<6
+optuna>=4.5,<5
+plotly>=6.3,<7
+xgboost>=3.0,<4

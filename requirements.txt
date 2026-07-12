@@ -1,6 +1,5 @@
 -r requirements-api.txt
 
-dvc[s3]
-mlflow
-python-dotenv
-seaborn
+dvc[s3]>=3.59,<4
+mlflow>=3.1,<4
+seaborn>=0.13,<1

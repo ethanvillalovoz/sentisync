@@ -18,6 +18,7 @@ Fixes #(issue)
 ## Verification
 
 - [ ] I ran `python -m unittest discover tests`
+- [ ] I ran `npm run check:frontend`
 - [ ] I ran Python compile checks for changed Python files
 - [ ] I built the Docker image, if backend dependencies or Docker changed
 - [ ] I manually tested the Chrome extension, if extension behavior changed

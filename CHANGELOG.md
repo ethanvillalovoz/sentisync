@@ -5,11 +5,17 @@
 ### Added
 
 - Security policy and code of conduct for public issue and pull request handling.
+- Deterministic extension demo, compact audience dashboard, and animated repository walkthrough.
+- Server-side YouTube comment retrieval with bounded request validation.
+- Frontend contract tests for URL parsing, summaries, permissions, and safe DOM rendering.
 
 ### Changed
 
 - Contributor setup now defaults to API runtime dependencies.
 - Manual deployment no longer injects AWS credentials into the running Flask container.
+- Replaced direct client-side YouTube API access with a server-side credential boundary.
+- Restricted CORS, payload sizes, extension permissions, and public error messages.
+- Migrated packaging to `pyproject.toml`, pinned Python 3.12, and stripped notebook outputs.
 
 ## v1.0.0 - Public Project Baseline
 
