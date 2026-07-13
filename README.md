@@ -7,8 +7,12 @@ Comment intelligence for YouTube, built as a Chrome extension backed by a reprod
 [![License: MIT](https://img.shields.io/badge/license-MIT-111111.svg)](LICENSE)
 
 <p align="center">
-  <img src="docs/media/sentisync-demo.gif" width="390" alt="SentiSync analyzing a YouTube discussion and switching from audience overview to comments" />
+  <a href="docs/media/sentisync-demo.mp4">
+    <img src="docs/media/sentisync-poster.webp" width="390" alt="SentiSync analyzing a YouTube discussion and switching from audience overview to comments" />
+  </a>
 </p>
+
+Select the native-size preview to watch the extension analyze bundled comments, summarize the discussion, and open the inspectable comment list.
 
 ## Product
 

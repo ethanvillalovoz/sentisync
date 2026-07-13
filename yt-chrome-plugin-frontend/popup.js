@@ -182,7 +182,7 @@ function renderTrend(predictions) {
     guide.setAttribute("x2", String(width));
     guide.setAttribute("y1", String(y));
     guide.setAttribute("y2", String(y));
-    guide.setAttribute("stroke", "#deded9");
+    guide.setAttribute("stroke", "#ded9d2");
     guide.setAttribute("stroke-width", "1");
     svg.append(guide);
   }
@@ -195,7 +195,7 @@ function renderTrend(predictions) {
   const line = document.createElementNS(namespace, "polyline");
   line.setAttribute("points", points.join(" "));
   line.setAttribute("fill", "none");
-  line.setAttribute("stroke", "#47776d");
+  line.setAttribute("stroke", "#0f0f0f");
   line.setAttribute("stroke-width", "2");
   line.setAttribute("vector-effect", "non-scaling-stroke");
   svg.append(line);

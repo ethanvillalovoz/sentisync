@@ -12,10 +12,10 @@
     <div class="app-shell">
       <header class="topbar">
         <a class="brand" href="https://github.com/ethanvillalovoz/sentisync" target="_blank" rel="noreferrer">
-          <span class="brand-mark" aria-hidden="true">S</span>
+          <span class="signal-mark" aria-hidden="true"><i></i></span>
           <span>
             <strong>SentiSync</strong>
-            <small>Comment intelligence</small>
+            <small>Comment analysis</small>
           </span>
         </a>
         <span class="mode-badge" id="mode-badge">Local</span>
@@ -23,24 +23,24 @@
 
       <main>
         <section class="intro" id="intro-view" aria-labelledby="intro-title">
-          <p class="eyebrow">YouTube sentiment analysis</p>
-          <h1 id="intro-title">Read the room, not every comment.</h1>
-          <p class="intro-copy">
-            Analyze the current video's conversation with a reproducible TF-IDF and LightGBM pipeline.
-          </p>
+          <h1 id="intro-title">Current video</h1>
           <div class="video-context" id="video-context">
-            <span class="context-label">Current tab</span>
-            <strong id="video-title">Detecting YouTube video...</strong>
+            <div class="video-thumbnail" aria-hidden="true"><span>00:48</span><i></i></div>
+            <div>
+              <span class="context-label">YouTube</span>
+              <strong id="video-title">Detecting YouTube video...</strong>
+            </div>
           </div>
           <button class="primary-action" id="analyze-button" type="button" disabled>
             Analyze comments
           </button>
           <p class="status-copy" id="status-copy" aria-live="polite">Checking the active tab.</p>
+          <p class="method-note"><strong>Method</strong> TF-IDF features with LightGBM classification.</p>
         </section>
 
         <section class="loading-view" id="loading-view" aria-labelledby="loading-title" hidden>
-          <p class="eyebrow">Analysis running</p>
-          <h2 id="loading-title">Building the signal.</h2>
+          <p class="loading-label">Analyzing current video</p>
+          <h2 id="loading-title">Reading the discussion</h2>
           <ol class="pipeline-list" id="pipeline-list">
             <li data-step="comments"><span>01</span><strong>Collect comments</strong></li>
             <li data-step="features"><span>02</span><strong>Transform text</strong></li>
@@ -52,13 +52,11 @@
         <section class="results-view" id="results-view" aria-labelledby="results-title" hidden>
           <div class="results-heading">
             <div>
-              <p class="eyebrow">Comment pulse</p>
-              <h2 id="results-title">Audience signal</h2>
+              <h2 id="results-title">Comment analysis</h2>
+              <p class="video-name" id="result-video-title"></p>
             </div>
-            <button class="text-action" id="reanalyze-button" type="button">Refresh</button>
+            <button class="text-action" id="reanalyze-button" type="button" aria-label="Refresh analysis" title="Refresh analysis">&#8635;</button>
           </div>
-
-          <p class="video-name" id="result-video-title"></p>
 
           <div class="metrics-grid" aria-label="Analysis summary">
             <div class="metric"><span>Analyzed</span><strong id="metric-total">0</strong></div>
@@ -96,7 +94,7 @@
       </main>
 
       <footer>
-        <span>TF-IDF + LightGBM</span>
+        <span>Local model</span>
         <span id="footer-status">Waiting</span>
       </footer>
     </div>

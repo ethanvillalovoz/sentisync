@@ -2,12 +2,10 @@
 # Imports and Configuration
 # ====================================
 
-import numpy as np
 import pandas as pd
 import os
 import re
 import nltk
-import string
 import logging
 
 from nltk.corpus import stopwords
