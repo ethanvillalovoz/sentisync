@@ -8,7 +8,7 @@ I built SentiSync to answer a narrower question than “are these comments posit
 
 [![SentiSync demo: analyze a video comment distribution, trend, and individual labels](docs/media/sentisync-demo.gif)](docs/media/sentisync-demo.mp4)
 
-The recording starts with bundled comments, then opens the negative slice to show the rows behind the chart. [MP4 demo](docs/media/sentisync-demo.mp4) · [poster frame](docs/media/sentisync-poster.webp)
+The recording starts with bundled comments, moves through the overview, and then opens the comment-level results behind the summary. [MP4 demo](docs/media/sentisync-demo.mp4) · [poster frame](docs/media/sentisync-poster.webp)
 
 ## Product
 

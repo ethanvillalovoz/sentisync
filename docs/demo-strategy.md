@@ -3,7 +3,7 @@
 SentiSync has two public demonstration paths:
 
 1. `popup.html?demo=1` runs a deterministic, credential-free product preview.
-2. `docs/media/sentisync-demo.mp4` captures the extension at its native 390-pixel width and shows the loading, overview, and comments states directly in GitHub and portfolio surfaces.
+2. `docs/media/sentisync-demo.mp4` records the real demo route at high pixel density and shows the loading, overview, and comments states directly in GitHub and portfolio surfaces. The presentation-width layout uses the extension's actual DOM and bundled data; it is not composited over an earlier recording.
 
 `docs/media/sentisync-poster.webp` preserves the completed comment view for surfaces that do not play video.
 
