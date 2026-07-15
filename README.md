@@ -1,6 +1,6 @@
 # SentiSync
 
-Comment intelligence for YouTube, built as a Chrome extension backed by a reproducible TF-IDF and LightGBM pipeline.
+I built SentiSync to answer a narrower question than “are these comments positive?” The extension shows the distribution, how it moves over time, and the exact comments behind each label.
 
 [![CI](https://github.com/ethanvillalovoz/sentisync/actions/workflows/ci.yml/badge.svg)](https://github.com/ethanvillalovoz/sentisync/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-111111.svg)](https://www.python.org/)
@@ -8,7 +8,7 @@ Comment intelligence for YouTube, built as a Chrome extension backed by a reprod
 
 [![SentiSync demo: analyze a video comment distribution, trend, and individual labels](docs/media/sentisync-demo.gif)](docs/media/sentisync-demo.mp4)
 
-The extension analyzes bundled comments, summarizes the distribution and trend, then opens the individual labels for inspection. [MP4 demo](docs/media/sentisync-demo.mp4) · [poster frame](docs/media/sentisync-poster.webp)
+The recording starts with bundled comments, then opens the negative slice to show the rows behind the chart. [MP4 demo](docs/media/sentisync-demo.mp4) · [poster frame](docs/media/sentisync-poster.webp)
 
 ## Product
 
@@ -18,19 +18,9 @@ The YouTube API key stays on the Flask server. The extension sends only a valida
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    Y[YouTube video] --> X[Chrome extension]
-    X -->|video ID| A[Flask API]
-    A -->|server-side key| D[YouTube Data API]
-    D --> A
-    A --> T[TF-IDF vectorizer]
-    T --> L[LightGBM classifier]
-    L --> X
-    P[DVC pipeline] --> T
-    P --> L
-    P --> M[MLflow experiments]
-```
+[![SentiSync architecture connecting the Chrome extension, API, YouTube data, model pipeline, and experiment tracking](docs/media/analysis-pipeline.svg)](docs/media/analysis-pipeline.excalidraw)
+
+Open the architecture image for its editable Excalidraw scene.
 
 | Surface | Responsibility |
 | --- | --- |

@@ -275,7 +275,12 @@ h3 {
 }
 
 .text-action:hover { background: var(--subtle); }
-.text-action:active { transform: rotate(-25deg); }
+.text-action:active img { transform: rotate(-25deg); }
+
+.text-action img {
+  display: block;
+  transition: transform 120ms ease;
+}
 
 .metrics-grid {
   display: flex;
@@ -336,10 +341,22 @@ h3 {
 
 .distribution-row {
   display: grid;
+  width: 100%;
   grid-template-columns: 55px minmax(0, 1fr) 32px;
   align-items: center;
   gap: 8px;
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
   font-size: 10px;
+  text-align: left;
+}
+
+.distribution-row:hover > span:first-child,
+.distribution-row:focus-visible > span:first-child {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .bar-track {
@@ -356,7 +373,43 @@ h3 {
 .distribution-value { text-align: right; font-variant-numeric: tabular-nums; }
 
 .trend-chart { height: 94px; }
-.trend-chart svg { display: block; width: 100%; height: 100%; }
+.trend-chart canvas { display: block; width: 100% !important; height: 100% !important; }
+
+.comment-filters {
+  display: flex;
+  gap: 5px;
+  padding: 12px 0 7px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.comment-filters::-webkit-scrollbar { display: none; }
+
+.comment-filters button {
+  display: inline-flex;
+  min-height: 28px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 9px;
+}
+
+.comment-filters button.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.comment-filters button span {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
+}
 
 .comment-list {
   margin: 0;

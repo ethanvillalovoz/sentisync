@@ -18,10 +18,15 @@ const elements = {
   analyzeButton: document.querySelector("#analyze-button"),
   commentsPanel: document.querySelector("#comments-panel"),
   commentsTab: document.querySelector("#comments-tab"),
+  commentFilters: [...document.querySelectorAll("[data-filter]")],
   commentList: document.querySelector("#comment-list"),
   distribution: document.querySelector("#distribution"),
   distributionCount: document.querySelector("#distribution-count"),
   footerStatus: document.querySelector("#footer-status"),
+  filterAllCount: document.querySelector("#filter-all-count"),
+  filterNegativeCount: document.querySelector("#filter-negative-count"),
+  filterNeutralCount: document.querySelector("#filter-neutral-count"),
+  filterPositiveCount: document.querySelector("#filter-positive-count"),
   introView: document.querySelector("#intro-view"),
   loadingView: document.querySelector("#loading-view"),
   metricPositive: document.querySelector("#metric-positive"),
@@ -40,6 +45,9 @@ const elements = {
 };
 
 let activeVideo = null;
+let activeFilter = "all";
+let latestPredictions = [];
+let trendChart = null;
 
 function createElement(tag, className, text) {
   const node = document.createElement(tag);
@@ -148,7 +156,10 @@ function renderDistribution(summary) {
 
   for (const [label, className, count] of rows) {
     const percentage = summary.total ? Math.round((count / summary.total) * 100) : 0;
-    const row = createElement("div", "distribution-row");
+    const row = createElement("button", "distribution-row");
+    row.type = "button";
+    row.dataset.filter = className;
+    row.setAttribute("aria-label", `Show ${count} ${label.toLowerCase()} comments`);
     const track = createElement("div", "bar-track");
     const fill = createElement("div", `bar-fill ${className}`);
     fill.style.width = `${percentage}%`;
@@ -167,45 +178,55 @@ function renderDistribution(summary) {
 
 function renderTrend(predictions) {
   const values = createTrendSeries(predictions);
-  const width = 330;
-  const height = 92;
-  const inset = 5;
-  const namespace = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(namespace, "svg");
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", "Average sentiment from oldest to newest comments");
-
-  for (const y of [inset, height / 2, height - inset]) {
-    const guide = document.createElementNS(namespace, "line");
-    guide.setAttribute("x1", "0");
-    guide.setAttribute("x2", String(width));
-    guide.setAttribute("y1", String(y));
-    guide.setAttribute("y2", String(y));
-    guide.setAttribute("stroke", "#ded9d2");
-    guide.setAttribute("stroke-width", "1");
-    svg.append(guide);
-  }
-
-  const points = values.map((value, index) => {
-    const x = values.length === 1 ? width / 2 : (index / (values.length - 1)) * width;
-    const y = inset + ((1 - value) / 2) * (height - inset * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  const canvas = document.createElement("canvas");
+  canvas.setAttribute("aria-label", "Average sentiment from oldest to newest comments");
+  canvas.setAttribute("role", "img");
+  elements.trendChart.replaceChildren(canvas);
+  trendChart?.destroy();
+  trendChart = new globalThis.Chart(canvas, {
+    type: "line",
+    data: {
+      labels: values.map((_, index) => String(index + 1)),
+      datasets: [{
+        data: values,
+        borderColor: "#0f0f0f",
+        borderWidth: 1.5,
+        pointBackgroundColor: "#ffffff",
+        pointBorderColor: "#0f0f0f",
+        pointRadius: 2,
+        tension: 0.22,
+      }],
+    },
+    options: {
+      animation: { duration: 280 },
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false, grid: { display: false } },
+        y: {
+          min: -1,
+          max: 1,
+          ticks: { display: false, stepSize: 1 },
+          border: { display: false },
+          grid: { color: "#ded9d2", drawTicks: false },
+        },
+      },
+    },
   });
-  const line = document.createElementNS(namespace, "polyline");
-  line.setAttribute("points", points.join(" "));
-  line.setAttribute("fill", "none");
-  line.setAttribute("stroke", "#0f0f0f");
-  line.setAttribute("stroke-width", "2");
-  line.setAttribute("vector-effect", "non-scaling-stroke");
-  svg.append(line);
-
-  elements.trendChart.replaceChildren(svg);
 }
 
-function renderComments(predictions) {
+function renderComments(predictions, filter = activeFilter) {
+  activeFilter = filter;
+  const visiblePredictions = filter === "all"
+    ? predictions
+    : predictions.filter((item) => getSentimentMeta(item.sentiment).className === filter);
+  elements.commentFilters.forEach((button) => {
+    const isActive = button.dataset.filter === filter;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
   const fragment = document.createDocumentFragment();
-  predictions.slice(0, 12).forEach((item, index) => {
+  visiblePredictions.slice(0, 12).forEach((item, index) => {
     const sentiment = getSentimentMeta(item.sentiment);
     const row = createElement("li", "comment-item");
     row.append(
@@ -218,12 +239,23 @@ function renderComments(predictions) {
   elements.commentList.replaceChildren(fragment);
 }
 
+function showComments(filter) {
+  renderComments(latestPredictions, filter);
+  selectTab("comments");
+}
+
 function renderResults(predictions) {
   const summary = summarizePredictions(predictions);
+  latestPredictions = predictions;
+  activeFilter = "all";
   elements.resultVideoTitle.textContent = activeVideo.title;
   elements.metricTotal.textContent = String(summary.total);
   elements.metricPositive.textContent = `${summary.positivePercent}%`;
   elements.metricScore.textContent = summary.score;
+  elements.filterAllCount.textContent = String(summary.total);
+  elements.filterPositiveCount.textContent = String(summary.counts.positive);
+  elements.filterNeutralCount.textContent = String(summary.counts.neutral);
+  elements.filterNegativeCount.textContent = String(summary.counts.negative);
   renderDistribution(summary);
   renderTrend(predictions);
   renderComments(predictions);
@@ -267,5 +299,12 @@ elements.analyzeButton.addEventListener("click", analyze);
 elements.reanalyzeButton.addEventListener("click", analyze);
 elements.overviewTab.addEventListener("click", () => selectTab("overview"));
 elements.commentsTab.addEventListener("click", () => selectTab("comments"));
+elements.commentFilters.forEach((button) => {
+  button.addEventListener("click", () => showComments(button.dataset.filter));
+});
+elements.distribution.addEventListener("click", (event) => {
+  const row = event.target.closest("[data-filter]");
+  if (row) showComments(row.dataset.filter);
+});
 
 detectVideo();

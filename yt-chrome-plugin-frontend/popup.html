@@ -58,7 +58,9 @@
               <h2 id="results-title">Comment analysis</h2>
               <p class="video-name" id="result-video-title"></p>
             </div>
-            <button class="text-action" id="reanalyze-button" type="button" aria-label="Refresh analysis" title="Refresh analysis">&#8635;</button>
+            <button class="text-action" id="reanalyze-button" type="button" aria-label="Refresh analysis" title="Refresh analysis">
+              <img src="icons/refresh-cw.svg" alt="" width="15" height="15" />
+            </button>
           </div>
 
           <div class="metrics-grid" aria-label="Analysis summary">
@@ -91,6 +93,12 @@
           </div>
 
           <div class="tab-panel" id="comments-panel" role="tabpanel" aria-labelledby="comments-tab" hidden>
+            <div class="comment-filters" aria-label="Filter comments by sentiment" role="group">
+              <button class="is-active" data-filter="all" type="button">All <span id="filter-all-count">0</span></button>
+              <button data-filter="positive" type="button">Positive <span id="filter-positive-count">0</span></button>
+              <button data-filter="neutral" type="button">Neutral <span id="filter-neutral-count">0</span></button>
+              <button data-filter="negative" type="button">Negative <span id="filter-negative-count">0</span></button>
+            </div>
             <ol class="comment-list" id="comment-list"></ol>
           </div>
         </section>
@@ -102,6 +110,7 @@
       </footer>
     </div>
 
+    <script src="vendor/chart.umd.min.js"></script>
     <script src="config.js"></script>
     <script type="module" src="popup.js"></script>
   </body>
