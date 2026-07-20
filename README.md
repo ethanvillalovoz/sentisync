@@ -18,9 +18,9 @@ The YouTube API key stays on the Flask server. The extension sends only a valida
 
 ## Architecture
 
-[![SentiSync architecture connecting the Chrome extension, API, YouTube data, model pipeline, and experiment tracking](docs/media/analysis-pipeline.svg)](docs/media/analysis-pipeline.excalidraw)
+[![SentiSync system overview separating live YouTube inference from the offline Reddit-trained model pipeline and linking aggregate sentiment to comment-level evidence](docs/figures/sentisync-system-overview/exports/sentisync-system-overview.svg)](docs/figures/sentisync-system-overview/editable/sentisync-system-overview.pptx)
 
-Open the architecture image for its editable Excalidraw scene.
+The figure separates the live request path from offline model production and labels the demo and domain-shift boundaries directly. [Editable PowerPoint](docs/figures/sentisync-system-overview/editable/sentisync-system-overview.pptx) · [evidence contract](docs/figures/sentisync-system-overview/contract.md) · [figure provenance](docs/figures/sentisync-system-overview/provenance.json)
 
 | Surface | Responsibility |
 | --- | --- |
@@ -107,6 +107,7 @@ tests/                       API and extension contract tests
 notebooks/                   output-free historical experiments
 notebooks/results/           curated experiment figures
 docs/media/                  verified product captures
+docs/figures/                editable, evidence-bounded public figures
 ```
 
 ## Verification

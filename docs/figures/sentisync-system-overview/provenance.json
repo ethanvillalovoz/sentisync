@@ -1,0 +1,41 @@
+{
+  "figure": "SentiSync system overview",
+  "source_revision": "d445eb8",
+  "capture_route": "yt-chrome-plugin-frontend/popup.html?demo=1",
+  "capture_mode": "deterministic bundled fixtures",
+  "claim_boundary": "The figure documents maintained code paths and bundled demo output. It makes no live-deployment, classifier-accuracy, or Reddit-to-YouTube generalization claim.",
+  "sources": [
+    {
+      "path": "media/overview-demo.png",
+      "sha256": "8934c2bfca3e848ef1d3e882c83c5767d8f575e53cb7b9bf7416ec7eb471dea6"
+    },
+    {
+      "path": "media/comments-demo.png",
+      "sha256": "ae73eff25f65e6df4ce0e010d32007cf23c2d033dd46b194ebdd2f69e5134597"
+    },
+    {
+      "path": "media/comments-demo-figure-crop.png",
+      "derived_from": "media/comments-demo.png",
+      "operation": "top-aligned 780 x 1050 crop",
+      "sha256": "811535a8c29d8ab28c70b4ba3bcb013df0f484276f2e2c362b027e3242225c53"
+    }
+  ],
+  "deliverables": [
+    {
+      "path": "editable/sentisync-system-overview.pptx",
+      "sha256": "1999ee9547b335373b6eaed385cd31672fbcdb02ca14b894df3c99a47057e7a5"
+    },
+    {
+      "path": "exports/sentisync-system-overview.pdf",
+      "sha256": "43aceb564225e416f7c03fc6bf05ce9b30657245fb86f9777ba0d8af2dd56284"
+    },
+    {
+      "path": "exports/sentisync-system-overview.png",
+      "sha256": "7e4b5042a95e9b6a49360a8397511d8cc597ad8e0cb37cfd2d9088c6a563855d"
+    },
+    {
+      "path": "exports/sentisync-system-overview.svg",
+      "sha256": "8c71580fe675dfca969ce1778413d63198622d7831e8cc4ee8fba9bb7fcfc9b8"
+    }
+  ]
+}
