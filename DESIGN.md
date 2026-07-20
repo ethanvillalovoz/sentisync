@@ -10,6 +10,8 @@ SentiSync is a Chrome extension, so it should feel native to a compact browser w
 - Use a maintained chart library for the chronological trend rather than a decorative drawing.
 - Keep demo mode and the local-model method explicit.
 - Favor raw comments and model labels over generic audience-insight claims.
+- Separate live YouTube inference from the offline Reddit-data training path in public diagrams.
+- Keep the unevaluated Reddit-to-YouTube domain shift visible wherever the model pipeline is summarized.
 
 ## Avoid
 

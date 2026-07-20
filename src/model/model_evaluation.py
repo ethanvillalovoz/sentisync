@@ -206,7 +206,7 @@ def main():
             # Add metadata tags
             mlflow.set_tag("model_type", "LightGBM")
             mlflow.set_tag("task", "Sentiment Analysis")
-            mlflow.set_tag("dataset", "YouTube Comments")
+            mlflow.set_tag("dataset", "Reddit sentiment dataset")
 
             logger.debug("Model evaluation pipeline completed successfully.")
 
